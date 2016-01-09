@@ -3,20 +3,21 @@ Promisr
 
 An abstraction of Promise library and the utilities
 
+[![Build Status](https://travis-ci.org/japboy/promisr.svg)](https://travis-ci.org/japboy/promisr)
 
 ## tl;dr
 
 Install with NPM on Node.js:
 
 ```
-npm install --save git+https://github.com/japboy/promisr.git
+npm install --save promisr
 ```
 
 Load from CDN for web browsers:
 
-```
+```html
 <script src="https://npmcdn.com/underscore@1.8.3/underscore-min.js"></script>
-<script src="https://cdn.rawgit.com/japboy/promisr/master/dist/promisr.min.js"></script>
+<script src="https://npmcdn.com/promisr@0.1.0/dist/promisr.min.js"></script>
 ```
 
 Use this module like;
@@ -36,6 +37,8 @@ proc(true)
   console.log(value);  // true
 });
 ```
+
+Read [API doc](./blob/master/doc/api.md) for details.
 
 
 License

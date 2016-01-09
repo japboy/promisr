@@ -2,7 +2,7 @@
   "name": "promisr",
   "version": "0.1.0",
   "description": "Promise utils",
-  "main": "index.js",
+  "main": "./dist/promisr.js",
   "scripts": {
     "test": "npm run eslint && npm run mocha",
     "eslint": "eslint ./index.js",
