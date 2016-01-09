@@ -1,0 +1,10 @@
+framework: mocha
+serve_files:
+  - "./test/promisr.js"
+test_page: ./test/index.html
+before_tests: |
+  browserify ./test/index.js \
+  -o ./test/promisr.js \
+  -t babelify \
+  -t browserify-shim
+after_tests: rm ./test/promisr.js
