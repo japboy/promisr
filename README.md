@@ -38,7 +38,7 @@ proc(true)
 });
 ```
 
-Read [API doc](./blob/master/doc/api.md) for details.
+Read [API doc](doc/api.md) for details.
 
 
 License

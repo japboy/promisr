@@ -1,7 +1,7 @@
 {
   "name": "promisr",
   "version": "0.1.0",
-  "description": "Promise utils",
+  "description": "An abstraction of Promise library and the utilities",
   "main": "./dist/promisr.js",
   "scripts": {
     "test": "npm run eslint && npm run mocha",
