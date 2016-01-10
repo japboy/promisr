@@ -8,6 +8,8 @@ index.js
 
 - [`promisify`](#promisify)
 
+- [`all`](#all)
+
 - [`passed`](#passed)
 
 - [`promisified`](#promisified)
@@ -20,9 +22,7 @@ index.js
 
 - [`attemptTicked`](#attemptTicked)
 
-- [`all`](#all)
-
-- [`map`](#map)
+- [`flatMap`](#flatMap)
 
 ### <a id="Promisr"></a> `Promisr`
 
@@ -77,6 +77,33 @@ fn(true)
 
 - - -
 
+### <a id="all"></a> `all(Promise)`
+
+Shorthand for `Promise.all`, `Q.all`, or `$.when` to wait for multiple Promises
+
+```javascript
+var sleep = promisify(function (resolve, reject, millisec) {
+  setTimeout(function () {
+    resolve(millisec);
+  }, millisec);
+});
+
+all(sleep(100), sleep(200), sleep(300))
+.then(function (args) {
+  console.log(args[0], args[1], args[2]);  // 100, 200, 300
+});
+```
+
+#### Arguments:
+
+- `Promise :: Array|Object` arguments
+
+#### Return:
+
+*(Object)* A Promise object
+
+- - -
+
 ### <a id="passed"></a> `passed`
 
 Return the `value` through a Promise interface. This function will
@@ -95,7 +122,7 @@ passed(true)
 
 #### Return:
 
-*(Object)* a jQuery Deferred's Promise object
+*(Object)* a Promise object
 
 - - -
 
@@ -119,7 +146,7 @@ promisified(new Error('An error'))
 
 #### Return:
 
-*(Object)* a jQuery Deferred's Promise object
+*(Object)* a Promise object
 
 - - -
 
@@ -133,7 +160,7 @@ Promise returns timer sleep
 
 #### Return:
 
-*(Object)* a jQuery Deferred's Promise object
+*(Object)* a Promise object
 
 - - -
 
@@ -165,7 +192,7 @@ fn(false)
 
 #### Return:
 
-*(Function|Object)* A curried function or a jQuery Deferred's Promise object
+*(Function|Object)* A curried function or a Promise object
 
 - - -
 
@@ -234,34 +261,7 @@ See: https://gist.github.com/briancavalier/842626
 
 - - -
 
-### <a id="all"></a> `all(Promise)`
-
-Shorthand for `Promise.all`, `Q.all`, or `$.when` to wait for multiple Promises
-
-```javascript
-var sleep = promisify(function (resolve, reject, millisec) {
-  setTimeout(function () {
-    resolve(millisec);
-  }, millisec);
-});
-
-all(sleep(100), sleep(200), sleep(300))
-.then(function (a, b, c) {
-  console.log(a, b, c);  // 100, 200, 300
-});
-```
-
-#### Arguments:
-
-- `Promise :: Array|Object` arguments
-
-#### Return:
-
-*(Object)* A Promise object
-
-- - -
-
-### <a id="map"></a> `map(items, promisified)`
+### <a id="flatMap"></a> `flatMap(items, promisified)`
 
 Promise concatenates array values as promises
 
@@ -272,7 +272,7 @@ Promise concatenates array values as promises
 
 #### Return:
 
-*(Object)* a jQuery Deferred's Promise object
+*(Object)* a Promise object
 
 - - -
 
