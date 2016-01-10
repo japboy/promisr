@@ -16,7 +16,7 @@ npm install --save promisr
 Load from CDN for web browsers:
 
 ```html
-<script src="https://npmcdn.com/promisr@0.1.0/dist/promisr.min.js"></script>
+<script src="https://npmcdn.com/promisr@0.2.1/dist/promisr.min.js"></script>
 ```
 
 Use this module like;
