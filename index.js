@@ -163,7 +163,7 @@ var Promisr = (function () {
      * ```
      *
      * @param {Object} val Any values
-     * @returns {Object} a jQuery Deferred's Promise object
+     * @returns {Object} a Promise object
      */
     this.passed = this.promisify(function (resolve, reject, val) {
       resolve(val);
@@ -184,7 +184,7 @@ var Promisr = (function () {
      *
      * @method promisified
      * @param {Object} val Any values
-     * @returns {Object} a jQuery Deferred's Promise object
+     * @returns {Object} a Promise object
      */
     this.promisified = this.promisify(function (resolve, reject, val) {
       if (val instanceof global.Error) return reject(val);
@@ -195,7 +195,7 @@ var Promisr = (function () {
      * Promise returns timer sleep
      * @method sleep
      * @param {Number} millisec Milliseconds to wait
-     * @returns {Object} a jQuery Deferred's Promise object
+     * @returns {Object} a Promise object
      */
     this.sleep = this.promisify(function (resolve, reject, millisec) {
       var millisec = _.isNumber(millisec) ? millisec : 80;
@@ -232,7 +232,7 @@ var Promisr = (function () {
    *
    * @method lazify
    * @param {Function} func An immediate function being curried and lazy evaluated
-   * @returns {Function|Object} A curried function or a jQuery Deferred's Promise object
+   * @returns {Function|Object} A curried function or a Promise object
    */
   proto.lazify = function (func) {
     return _.bind(function () {
@@ -324,13 +324,14 @@ var Promisr = (function () {
 
   /**
    * Promise concatenates array values as promises
-   * @method map
+   * @method flatMap
    * @param {Array} items Array values will be tranformed to promises
    * @param {Function} promisified A function transforms `items` to promises
-   * @returns {Object} a jQuery Deferred's Promise object
+   * @returns {Object} a Promise object
    */
-  proto.map = function (items, promisified) {
-    return this.all(_.map(items, this.promisified));
+  proto.flatMap = function (items, promisified) {
+    if (!_.isFunction(promisified)) return;
+    return this.all(_.map(items, promisified));
   };
 
   return Promisr;
