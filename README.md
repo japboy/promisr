@@ -16,7 +16,6 @@ npm install --save promisr
 Load from CDN for web browsers:
 
 ```html
-<script src="https://npmcdn.com/underscore@1.8.3/underscore-min.js"></script>
 <script src="https://npmcdn.com/promisr@0.1.0/dist/promisr.min.js"></script>
 ```
 
