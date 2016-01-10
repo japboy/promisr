@@ -17,7 +17,11 @@ var Promisr = (function () {
    */
   function Promisr (Subject) {
 
-    if (Subject === global.Promise) {
+    // Expose Underscore
+    this._ = _;
+
+    // Expose Promise library used by this instance
+    if (global['Promise'] && Subject === global.Promise) {
       // ES2015 Promise
       this.Promise = Subject;
     } else if (_.isFunction(Subject.defer)) {
