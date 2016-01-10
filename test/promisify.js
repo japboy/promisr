@@ -3,7 +3,7 @@ var expect = require('chai').expect;
 
 var Promisr = require('../dist/promisr');
 
-describe('promisify', function () {
+describe('Tests for `promisify` method', function () {
   'use strict';
 
   var promisr = new Promisr(global.Promise);

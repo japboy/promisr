@@ -6,7 +6,7 @@ var Promisr = require('../dist/promisr');
 describe('lazify', function () {
   'use strict';
 
-  var promisr = new Promisr(global.Promise)
+  var promisr = new Promisr(global.Promise);
 
   var proc = promisr.lazify(function (value) {
     if (undefined === value) throw new Error('Empty parameter error');
