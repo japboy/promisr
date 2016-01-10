@@ -1,45 +1,45 @@
-import mocha from 'mocha'
-import { expect } from 'chai'
+var mocha = require('mocha');
+var expect = require('chai').expect;
 
-import _ from 'underscore'
-import Promisr from '../dist/promisr'
+var Promisr = require('../dist/promisr');
 
-describe('promisify', () => {
+describe('promisify', function () {
+  'use strict';
 
-  let promisr = new Promisr(global.Promise)
+  var promisr = new Promisr(global.Promise);
 
-  let proc = promisr.promisify(function (resolve, reject, value) {
-    if (true === value) return resolve(value)
-    reject(value)
-  })
+  var proc = promisr.promisify(function (resolve, reject, value) {
+    if (true === value) return resolve(value);
+    reject(value);
+  });
 
   context('Function which is promisified', function () {
     it('takes true and resolves it through Promise interface.', function () {
       return proc(true)
       .then(function (value) {
-        expect(value).to.be.true
+        expect(value).to.be.true;
       }, function (value) {
-        expect(value).to.not.exist
-      })
-    })
+        expect(value).to.not.exist;
+      });
+    });
 
     it('takes false and rejects it through Promise interface.', function () {
       return proc(false)
       .then(function (value) {
-        expect(value).to.not.exist
+        expect(value).to.not.exist;
       }, function (value) {
-        expect(value).to.be.false
-      })
-    })
+        expect(value).to.be.false;
+      });
+    });
 
     it('takes nothing and rejects it through Promise interface.', function () {
       return proc()
       .then(function (value) {
-        expect(value).to.not.exist
+        expect(value).to.not.exist;
       }, function (value) {
-        expect(value).to.be.an('undefined')
-      })
-    })
-  })
+        expect(value).to.be.an('undefined');
+      });
+    });
+  });
 
-})
+});

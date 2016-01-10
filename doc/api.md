@@ -29,7 +29,7 @@ index.js
 The constructor to instantiate Promisr class
 
 ```javascript
-let promisr = new Promisr(window.Promise || window.Q || window.jQuery)
+var promisr = new Promisr(window.Promise || window.Q || window.jQuery)
 ```
 
 #### Arguments:

@@ -4,7 +4,7 @@ serve_files:
 test_page: ./test/index.html
 before_tests: |
   browserify ./test/index.js \
-  -o ./test/promisr.js \
-  -t babelify \
-  -t browserify-shim
+  --outfile ./test/promisr.js \
+  --transform browserify-shim \
+  --standalone Promisr
 after_tests: rm ./test/promisr.js

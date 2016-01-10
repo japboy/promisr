@@ -1,12 +1,12 @@
-import mocha from 'mocha'
-import { expect } from 'chai'
+var mocha = require('mocha');
+var expect = require('chai').expect;
 
-import _ from 'underscore'
-import Promisr from '../dist/promisr'
+var Promisr = require('../dist/promisr');
 
 describe('passed', function () {
+  'use strict';
 
-  let promisr = new Promisr(global.Promise)
+  var promisr = new Promisr(global.Promise);
 
   var proc = promisr.passed;
 

@@ -1,12 +1,13 @@
-import _ from 'underscore'
+var _ = require('underscore');
 
-class Promisr {
+var Promisr = (function () {
+  'use strict';
 
   /**
    * The constructor to instantiate Promisr class
    *
    * ```javascript
-   * let promisr = new Promisr(window.Promise || window.Q || window.jQuery)
+   * var promisr = new Promisr(window.Promise || window.Q || window.jQuery)
    * ```
    *
    * @class Promisr
@@ -14,18 +15,20 @@ class Promisr {
    * @returns {Object} An instance of Promisr class associated with `Promise`,
    *     `Q`, or `$`
    */
-  constructor (Subject) {
+  function Promisr (Subject) {
+
     if (Subject === global.Promise) {
       // ES2015 Promise
-      this.Promise = Subject
+      this.Promise = Subject;
     } else if (_.isFunction(Subject.defer)) {
       // Q Deferred
-      this.Q = Subject
+      this.Q = Subject;
     } else if (_.isObject(Subject.Deferred)) {
       // jQuery Deferred
-      this.$ = Subject
+      this.$ = Subject;
     } else {
-      throw new global.Error('No Promise modules found. ES2015 Promise, Q Deferred, or jQuery Deferred required.')
+      var message = 'No Promise modules found. ES2015 Promise, Q Deferred, or jQuery Deferred required.';
+      throw new global.Error(message);
     }
 
     /**
@@ -57,46 +60,46 @@ class Promisr {
      *     `reject` callbacks and being executed asynchronously
      * @returns {Function} A partial function will returns a Promise
      */
-    this.promisify = ((Promise, Q, $) => {
+    this.promisify = (function (Promise, Q, $) {
       if (Promise) {
         // ES2015 Promise
         return function (func) {
-          let partial = (...args) => {
-            let promise = new Promise((resolve, reject) => {
-              func.apply(undefined, _.union([ resolve, reject ], args))
+          return function() {
+            var args = _.toArray(arguments);
+            var promise = new Promise(function (resolve, reject) {
+              return func.apply(undefined, _.union([ resolve, reject ], args));
             })
-            return promise
-          }
-          return partial
+            return promise;
+          };
         }
       } else if (Q) {
         // Q Deferred
         return function (func) {
-          let partial = (...args) => {
-            let dfr = Q.defer(), promiseArgs = [ dfr.resolve, dfr.reject ]
-            let timeoutId = global.setTimeout(() => {
-              global.clearTimeout(timeoutId)
-              func.apply(undefined, _.union(promiseArgs, args))
-            }, 1)
-            return dfr.promise
-          }
-          return partial
+          return function () {
+            var args = _.toArray(arguments);
+            var dfr = Q.defer(), promiseArgs = [ dfr.resolve, dfr.reject ];
+            var timeoutId = global.setTimeout(function () {
+              global.clearTimeout(timeoutId);
+              func.apply(undefined, _.union(promiseArgs, args));
+            }, 1);
+            return dfr.promise;
+          };
         }
       } else if ($) {
         // jQuery Deferred
         return function (func) {
-          let partial = (...args) => {
-            let dfr = new $.Deferred(), promiseArgs = [ dfr.resolve, dfr.reject ]
-            let timeoutId = global.setTimeout(() => {
-              global.clearTimeout(timeoutId)
-              func.apply(undefined, _.union(promiseArgs, args))
-            }, 1)
-            return dfr.promise()
-          }
-          return partial
+          return function () {
+            var args = _.toArray(arguments);
+            var dfr = new $.Deferred(), promiseArgs = [ dfr.resolve, dfr.reject ];
+            var timeoutId = global.setTimeout(function () {
+              global.clearTimeout(timeoutId);
+              func.apply(undefined, _.union(promiseArgs, args));
+            }, 1);
+            return dfr.promise();
+          };
         }
       }
-    })(this.Promise, this.Q, this.$)
+    })(this.Promise, this.Q, this.$);
 
     /**
      * Return the `value` through a Promise interface. This function will
@@ -112,9 +115,9 @@ class Promisr {
      * @param {Object} val Any values
      * @returns {Object} a jQuery Deferred's Promise object
      */
-    this.passed = this.promisify((resolve, reject, val) => {
-      resolve(val)
-    })
+    this.passed = this.promisify(function (resolve, reject, val) {
+      resolve(val);
+    });
 
     /**
      * Return the `value` through a Promise interface. This function, despite
@@ -133,10 +136,10 @@ class Promisr {
      * @param {Object} val Any values
      * @returns {Object} a jQuery Deferred's Promise object
      */
-    this.promisified = this.promisify((resolve, reject, val) => {
-      if (val instanceof global.Error) return reject(val)
-      resolve(val)
-    })
+    this.promisified = this.promisify(function (resolve, reject, val) {
+      if (val instanceof global.Error) return reject(val);
+      resolve(val);
+    });
 
     /**
      * Promise returns timer sleep
@@ -144,13 +147,17 @@ class Promisr {
      * @param {Number} millisec Milliseconds to wait
      * @returns {Object} a jQuery Deferred's Promise object
      */
-    this.sleep = this.promisify((resolve, reject, millisec=80) => {
-      let id = global.setTimeout(() => {
-        global.clearTimeout(id)
-        resolve(millisec)
-      }, millisec - 1)
-    })
+    this.sleep = this.promisify(function (resolve, reject, millisec) {
+      var millisec = _.isNumber(millisec) ? millisec : 80;
+      var id = global.setTimeout(function () {
+        global.clearTimeout(id);
+        resolve(millisec);
+      }, millisec - 1);
+    });
+
   }
+
+  var proto = Promisr.prototype;
 
   /**
    * Create new asynchronous function which returns a Promise interface. This higher-order function, despite the function which is returned by `promisify` has `resolve` and `reject`, only has user defined arguments.
@@ -177,20 +184,20 @@ class Promisr {
    * @param {Function} func An immediate function being curried and lazy evaluated
    * @returns {Function|Object} A curried function or a jQuery Deferred's Promise object
    */
-  lazify (func) {
-    let partial = (...args) => {
-      let done = this.promisify((resolve, reject) => {
+  proto.lazify = function (func) {
+    return _.bind(function () {
+      var args = _.toArray(arguments);
+      var done = this.promisify(function (resolve, reject) {
         try {
-          var val = func.apply(undefined, args)
-          resolve(val)
+          var val = func.apply(undefined, args);
+          resolve(val);
         } catch (err) {
-          reject(err)
+          reject(err);
         }
-      })
-      return done()
-    }
-    return partial
-  }
+      });
+      return done();
+    }, this);
+  };
 
   /**
    * Return the `done` Promise interface which has been retried `times` with `interval`.
@@ -218,15 +225,17 @@ class Promisr {
    * @param {Number} interval An amount of millisecond interval
    * @returns {Object} A Promise returns success or failed status
    */
-  attemptCounted (done, times, interval) {
-    let success = (dat) => dat
-    let fail = (err) => {
-      if (1 >= times) return err
+  proto.attemptCounted = function (done, times, interval) {
+    function success (dat) { return dat; }
+    function fail (err) {
+      if (1 >= times) return err;
       return this.sleep(interval)
-      .then(() => this.attemptCounted(done, times - 1, interval))
+      .then(function () {
+        return this.attemptCounted(done, times - 1, interval);
+      });
     }
-    return done().then(success, fail)
-  }
+    return done().then(success, _.bind(fail, this));
+  };
 
   /**
    * Return the `done` Promise interface which has been retried in the `duration`.
@@ -252,15 +261,16 @@ class Promisr {
    * @param {Number} times A number of millisecon duration
    * @returns {Object} A Promise returns success or failed status
    */
-  attemptTicked (done, duration, start=+(new global.Date())) {
-    let success = (dat) => dat
-    let fail = (err) => {
-      let stop = +(new global.Date())
-      if (duration > stop - start) return this.attemptTicked(done, duration, start)
-      return err
+  proto.attemptTicked = function (done, duration, start) {
+    var start = _.isNumber(start) ? start : +(new global.Date());
+    function success (dat) { return dat; }
+    function fail (err) {
+      var stop = +(new global.Date());
+      if (duration > stop - start) return this.attemptTicked(done, duration, start);
+      return err;
     }
-    return done().then(success, fail);
-  }
+    return done().then(success, _.bind(fail, this));
+  };
 
   /**
    * Shorthand for `Promise.all`, `Q.all`, or `$.when` to wait for multiple Promises
@@ -282,16 +292,17 @@ class Promisr {
    * @param {Array|Object} Promise arguments
    * @returns {Object} A Promise object
    */
-  all (...args) {
-    let promises = _.isArray(args[0]) ? args[0] : args
+  proto.all = function () {
+    var args = _.toArray(arguments);
+    var promises = _.isArray(args[0]) ? args[0] : args;
     if (this.Promise) {
-      return this.Promise.all.apply(undefined, promises)
+      return this.Promise.all.apply(undefined, promises);
     } else if (this.Q) {
-      return this.Q.all(promises)
+      return this.Q.all(promises);
     } else if (this.$) {
       return this.$.when.apply(undefined, promises);
     }
-  }
+  };
 
   /**
    * Promise concatenates array values as promises
@@ -300,10 +311,12 @@ class Promisr {
    * @param {Function} promisified A function transforms `items` to promises
    * @returns {Object} a jQuery Deferred's Promise object
    */
-  map (items, promisified) {
-    return all(_.map(items, this.promisified));
-  }
+  proto.map = function (items, promisified) {
+    return this.all(_.map(items, this.promisified));
+  };
 
-}
+  return Promisr;
 
-module.exports = Promisr
+})();
+
+module.exports = Promisr;
