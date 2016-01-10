@@ -102,6 +102,52 @@ var Promisr = (function () {
     })(this.Promise, this.Q, this.$);
 
     /**
+     * Shorthand for `Promise.all`, `Q.all`, or `$.when` to wait for multiple Promises
+     *
+     * ```javascript
+     * var sleep = promisify(function (resolve, reject, millisec) {
+     *   setTimeout(function () {
+     *     resolve(millisec);
+     *   }, millisec);
+     * });
+     *
+     * all(sleep(100), sleep(200), sleep(300))
+     * .then(function (args) {
+     *   console.log(args[0], args[1], args[2]);  // 100, 200, 300
+     * });
+     * ```
+     *
+     * @method all
+     * @param {Array|Object} Promise arguments
+     * @returns {Object} A Promise object
+     */
+    this.all = (function (Promise, Q, $) {
+      if (Promise) {
+        return function () {
+          var args = _.toArray(arguments);
+          var promises = _.isArray(args[0]) ? args[0] : args;
+          return Promise.all(promises);
+        };
+      } else if (Q) {
+        return function () {
+          var args = _.toArray(arguments);
+          var promises = _.isArray(args[0]) ? args[0] : args;
+          return Q.all(promises);
+        };
+      } else if ($) {
+        return function () {
+          var args = _.toArray(arguments);
+          var promises = _.isArray(args[0]) ? args[0] : args;
+          return $.when.apply(undefined, promises)
+          .then(this.lazify(function () {
+            return _.toArray(arguments);
+          }));
+        };
+      }
+    })(this.Promise, this.Q, this.$);
+
+
+    /**
      * Return the `value` through a Promise interface. This function will
      * always `resolve` the `value`.
      *
@@ -228,11 +274,11 @@ var Promisr = (function () {
   proto.attemptCounted = function (done, times, interval) {
     function success (dat) { return dat; }
     function fail (err) {
-      if (1 >= times) return err;
+      if (1 >= times) throw err;
       return this.sleep(interval)
-      .then(function () {
+      .then(_.bind(function () {
         return this.attemptCounted(done, times - 1, interval);
-      });
+      }, this));
     }
     return done().then(success, _.bind(fail, this));
   };
@@ -266,42 +312,10 @@ var Promisr = (function () {
     function success (dat) { return dat; }
     function fail (err) {
       var stop = +(new global.Date());
-      if (duration > stop - start) return this.attemptTicked(done, duration, start);
-      return err;
+      if (duration <= stop - start) throw err;
+      return this.attemptTicked(done, duration, start);
     }
     return done().then(success, _.bind(fail, this));
-  };
-
-  /**
-   * Shorthand for `Promise.all`, `Q.all`, or `$.when` to wait for multiple Promises
-   *
-   * ```javascript
-   * var sleep = promisify(function (resolve, reject, millisec) {
-   *   setTimeout(function () {
-   *     resolve(millisec);
-   *   }, millisec);
-   * });
-   *
-   * all(sleep(100), sleep(200), sleep(300))
-   * .then(function (a, b, c) {
-   *   console.log(a, b, c);  // 100, 200, 300
-   * });
-   * ```
-   *
-   * @method all
-   * @param {Array|Object} Promise arguments
-   * @returns {Object} A Promise object
-   */
-  proto.all = function () {
-    var args = _.toArray(arguments);
-    var promises = _.isArray(args[0]) ? args[0] : args;
-    if (this.Promise) {
-      return this.Promise.all.apply(undefined, promises);
-    } else if (this.Q) {
-      return this.Q.all(promises);
-    } else if (this.$) {
-      return this.$.when.apply(undefined, promises);
-    }
   };
 
   /**
