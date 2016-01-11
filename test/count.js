@@ -3,7 +3,7 @@ var expect = require('chai').expect;
 
 var Promisr = require('../dist/promisr');
 
-describe('Tests for `attemptCounted` method', function () {
+describe('Tests for `count` method', function () {
   'use strict';
 
   var promisr = new Promisr(global.Promise);
@@ -17,7 +17,7 @@ describe('Tests for `attemptCounted` method', function () {
         return count;
       });
 
-      return promisr.attemptCounted(done, 10, 100)
+      return promisr.count(done, 10, 100)
       .then(function (currentCount) {
         expect(currentCount).to.equal(count);
       }, function (error) {
@@ -34,7 +34,7 @@ describe('Tests for `attemptCounted` method', function () {
         return count;
       });
 
-      return promisr.attemptCounted(done, 5, 100)
+      return promisr.count(done, 5, 100)
       .then(function (currentCount) {
         expect(currentCount).to.not.exist;
       }, function (error) {

@@ -10,7 +10,7 @@ describe('Tests for `all` method', function () {
 
   context('Function with sequencial arguments', function () {
     it('returns a Promise and the argument is an array containing the results', function () {
-      return promisr.all(promisr.sleep(100), promisr.sleep(200), promisr.sleep(300))
+      return promisr.all(promisr.timer(100), promisr.timer(200), promisr.timer(300))
       .then(function (results) {
         expect(results).to.be.instanceof(global.Array);
         expect(results[0]).to.equal(100);
@@ -24,7 +24,7 @@ describe('Tests for `all` method', function () {
 
   context('Function with an array argument', function () {
     it('returns a Promise and the argument is an array containing the results', function () {
-      return promisr.all([ promisr.sleep(100), promisr.sleep(200), promisr.sleep(300) ])
+      return promisr.all([ promisr.timer(100), promisr.timer(200), promisr.timer(300) ])
       .then(function (results) {
         expect(results).to.be.instanceof(global.Array);
         expect(results[0]).to.equal(100);

@@ -25,9 +25,9 @@ describe('Tests for instantiation of `Promisr` class', function () {
 
 // Tests for class methods
 require('./promisify');
-require('./all');
 require('./lazify');
-require('./passed');
-require('./promisified');
-require('./attemptCounted');
-require('./attemptTicked');
+require('./just');
+require('./if');
+require('./all');
+require('./count');
+require('./tick');

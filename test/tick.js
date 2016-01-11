@@ -3,7 +3,7 @@ var expect = require('chai').expect;
 
 var Promisr = require('../dist/promisr');
 
-describe('Tests for `attemptTicked` method', function () {
+describe('Tests for `tick` method', function () {
   'use strict';
 
   var promisr = new Promisr(global.Promise);
@@ -17,7 +17,7 @@ describe('Tests for `attemptTicked` method', function () {
       });
       global.setTimeout(function () { flag = true; }, 500);
 
-      promisr.attemptTicked(done, 600)
+      promisr.tick(done, 600)
       .then(function (currentFlag) {
         expect(currentFlag).to.equal(flag);
       }, function (error) {
@@ -33,7 +33,7 @@ describe('Tests for `attemptTicked` method', function () {
       });
       setTimeout(function () { flag = true; }, 600);
 
-      promisr.attemptTicked(done, 600)
+      promisr.tick(done, 600)
       .then(function (currentFlag) {
         expect(currentFlag).to.not.exist;
       }, function (error) {
