@@ -6,23 +6,33 @@ index.js
 
 - [`Promisr`](#Promisr)
 
+- [`isPromise`](#isPromise)
+
 - [`promisify`](#promisify)
-
-- [`all`](#all)
-
-- [`passed`](#passed)
-
-- [`promisified`](#promisified)
-
-- [`sleep`](#sleep)
 
 - [`lazify`](#lazify)
 
-- [`attemptCounted`](#attemptCounted)
+- [`just`](#just)
 
-- [`attemptTicked`](#attemptTicked)
+- [`if`](#if)
 
-- [`flatMap`](#flatMap)
+- [`unlessFalsy`](#unlessFalsy)
+
+- [`unlessError`](#unlessError)
+
+- [`timer`](#timer)
+
+- [`all`](#all)
+
+- [`any`](#any)
+
+- [`some`](#some)
+
+- [`map`](#map)
+
+- [`count`](#count)
+
+- [`tick`](#tick)
 
 ### <a id="Promisr"></a> `Promisr`
 
@@ -39,6 +49,10 @@ var promisr = new Promisr(window.Promise || window.Q || window.jQuery)
 #### Return:
 
 *(Object)* An instance of Promisr class associated with `Promise`,     `Q`, or `$`
+
+- - -
+
+### <a id="isPromise"></a> `isPromise()`
 
 - - -
 
@@ -77,93 +91,6 @@ fn(true)
 
 - - -
 
-### <a id="all"></a> `all(Promise)`
-
-Shorthand for `Promise.all`, `Q.all`, or `$.when` to wait for multiple Promises
-
-```javascript
-var sleep = promisify(function (resolve, reject, millisec) {
-  setTimeout(function () {
-    resolve(millisec);
-  }, millisec);
-});
-
-all(sleep(100), sleep(200), sleep(300))
-.then(function (args) {
-  console.log(args[0], args[1], args[2]);  // 100, 200, 300
-});
-```
-
-#### Arguments:
-
-- `Promise :: Array|Object` arguments
-
-#### Return:
-
-*(Object)* A Promise object
-
-- - -
-
-### <a id="passed"></a> `passed`
-
-Return the `value` through a Promise interface. This function will
-always `resolve` the `value`.
-
-```javascript
-passed(true)
-.then(function (value) {
-  console.log(value);  // true
-});
-```
-
-#### Arguments:
-
-- `val :: Object` Any values
-
-#### Return:
-
-*(Object)* a Promise object
-
-- - -
-
-### <a id="promisified"></a> `promisified(val)`
-
-Return the `value` through a Promise interface. This function, despite
-`passed` always `resolve`, will `reject` if the `value` is an error.
-
-```javascript
-promisified(new Error('An error'))
-.then(function (value) {
-  // Won't be called.
-}, function (error) {
-  console.error(error.message);  // An error
-});
-```
-
-#### Arguments:
-
-- `val :: Object` Any values
-
-#### Return:
-
-*(Object)* a Promise object
-
-- - -
-
-### <a id="sleep"></a> `sleep(millisec)`
-
-Promise returns timer sleep
-
-#### Arguments:
-
-- `millisec :: Number` Milliseconds to wait
-
-#### Return:
-
-*(Object)* a Promise object
-
-- - -
-
 ### <a id="lazify"></a> `lazify(func)`
 
 Create new asynchronous function which returns a Promise interface. This higher-order function, despite the function which is returned by `promisify` has `resolve` and `reject`, only has user defined arguments.
@@ -196,7 +123,165 @@ fn(false)
 
 - - -
 
-### <a id="attemptCounted"></a> `attemptCounted(done, times, interval)`
+### <a id="just"></a> `just(value)`
+
+Return the `value` through a Promise interface. This function will
+always `resolve` the `value`.
+
+```javascript
+promisr.just(true)
+.then(function (value) {
+  console.log(value);  // true
+});
+```
+
+#### Arguments:
+
+- `value :: Object` Anything
+
+#### Return:
+
+*(Promise)* a Promise object
+
+- - -
+
+### <a id="if"></a> `if(condition, value)`
+
+Return the `value` through a Promise interface. This function, despite
+`just` always `resolve`, will `reject` if the `condition()` is falsy.
+
+```javascript
+promisr.if(function (value) {
+  return !value instanceof Error;
+}, new Error('An error'))
+.then(function (value) {
+  // Won't be called.
+}, function (error) {
+  console.error(error.message);  // An error
+});
+```
+
+#### Arguments:
+
+- `condition :: Function` A predicate
+- `value :: Object` Anything
+
+#### Return:
+
+*(Promise)* a Promise object
+
+- - -
+
+### <a id="unlessFalsy"></a> `unlessFalsy(value)`
+
+#### Arguments:
+
+- `value :: Object` Anything
+
+#### Return:
+
+*(Promise)* a Promise object
+
+- - -
+
+### <a id="unlessError"></a> `unlessError(value)`
+
+#### Arguments:
+
+- `value :: Object` Anything
+
+#### Return:
+
+*(Promise)* a Promise object
+
+- - -
+
+### <a id="timer"></a> `timer(millisec)`
+
+Promise returns timer sleep
+
+#### Arguments:
+
+- `millisec :: Number` Milliseconds to wait
+
+#### Return:
+
+*(Promise)* a Promise object
+
+- - -
+
+### <a id="all"></a> `all(args)`
+
+Shorthand for `Promise.all`, `Q.all`, or `$.when` to wait for multiple Promises
+
+```javascript
+promisr.all(promisr.timer(100), promisr.timer(200), promisr.timer(300))
+.then(function (results) {
+  console.log(results[0], results[1], results[2]);  // 100, 200, 300
+});
+```
+
+#### Arguments:
+
+- `args :: Array|Promise` Promise arguments
+
+#### Return:
+
+*(Promise)* A Promise object
+
+- - -
+
+### <a id="any"></a> `any(args)`
+
+#### Arguments:
+
+- `args :: Array|Promise` Promise arguments
+
+- - -
+
+### <a id="some"></a> `some(args)`
+
+#### Arguments:
+
+- `args :: Array|Promise` Promise arguments
+
+- - -
+
+### <a id="map"></a> `map(items, func)`
+
+Promise concatenates array values as promises
+
+```javascript
+promisr.map(urls, promisr.promisify(function (resolve, reject, url) {
+  var el = document.createElement('img');
+  el.addEventListener('load', function (ev) {
+    resolve(ev.target);
+  }, false);
+  el.addEventListener('error', function (ev) {
+    reject(error);
+  }, false);
+  el.setAttribute('src', url);
+}))
+.then(function (els) {
+  // Draw preloaded <img>'s
+  els.forEach(function (el) {
+    document.body.appendChild(el);
+  });
+});
+```
+
+#### Arguments:
+
+- `items :: Array` Array values will be tranformed to promises
+- `func :: Function` A function transforms `items` to promises
+
+#### Return:
+
+*(Object)* a Promise object
+
+- - -
+
+### <a id="count"></a> `count(done, times, interval)`
 
 Return the `done` Promise interface which has been retried `times` with `interval`.
 
@@ -209,7 +294,7 @@ var done = promisify(function (resolve, reject) {
   reject(new Error('Not yet'));
 });
 
-attemptCounted(done, 10, 300)
+promisr.count(done, 10, 300)
 .then(function (count) {
   console.log(count);  // 6
 });
@@ -229,7 +314,7 @@ See: https://gist.github.com/kriskowal/593052
 
 - - -
 
-### <a id="attemptTicked"></a> `attemptTicked(done, times)`
+### <a id="tick"></a> `tick(done, times)`
 
 Return the `done` Promise interface which has been retried in the `duration`.
 
@@ -242,7 +327,7 @@ var done = promisify(function (resolve, reject) {
   reject(new Error('Not yet'));
 });
 
-attemptTicked(done, 3000)
+promisr.tick(done, 3000)
 .then(function (flag) {
   console.log(flag);  // true
 });
@@ -258,21 +343,6 @@ See: https://gist.github.com/briancavalier/842626
 #### Return:
 
 *(Object)* A Promise returns success or failed status
-
-- - -
-
-### <a id="flatMap"></a> `flatMap(items, promisified)`
-
-Promise concatenates array values as promises
-
-#### Arguments:
-
-- `items :: Array` Array values will be tranformed to promises
-- `promisified :: Function` A function transforms `items` to promises
-
-#### Return:
-
-*(Object)* a Promise object
 
 - - -
 
