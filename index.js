@@ -35,179 +35,121 @@ var Promisr = (function () {
       throw new global.Error(message);
     }
 
-    /**
-     * Create new asynchronous function which returns a Promise interface.
-     * This is a higher-order function. The function `func` takes 2 parameters
-     * `resolve` and `reject` at least.
-     *
-     * #### func(resolve, reject, [args...])
-     *
-     * `resolve` and `reject` are always there, and `args...` can be continued
-     * if you want to put some arguments.
-     *
-     * Here is the example:
-     *
-     * ```javascript
-     * var fn = promisify(function (resolve, reject, value) {
-     *   if (value) return resolve(value);
-     *   reject(value);
-     * });
-     *
-     * fn(true)
-     * .then(function (value) {
-     *   console.log(value);  // true
-     * });
-     * ```
-     *
-     * @method promisify
-     * @param {Function} func An immediate function having `resolve` and
-     *     `reject` callbacks and being executed asynchronously
-     * @returns {Function} A partial function will returns a Promise
-     */
-    this.promisify = (function (Promise, Q, $) {
-      if (Promise) {
-        // ES2015 Promise
-        return function (func) {
-          return function() {
-            var args = _.toArray(arguments);
-            var promise = new Promise(function (resolve, reject) {
-              return func.apply(undefined, _.union([ resolve, reject ], args));
-            })
-            return promise;
-          };
-        }
-      } else if (Q) {
-        // Q Deferred
-        return function (func) {
-          return function () {
-            var args = _.toArray(arguments);
-            var dfr = Q.defer(), promiseArgs = [ dfr.resolve, dfr.reject ];
-            var timeoutId = global.setTimeout(function () {
-              global.clearTimeout(timeoutId);
-              func.apply(undefined, _.union(promiseArgs, args));
-            }, 1);
-            return dfr.promise;
-          };
-        }
-      } else if ($) {
-        // jQuery Deferred
-        return function (func) {
-          return function () {
-            var args = _.toArray(arguments);
-            var dfr = new $.Deferred(), promiseArgs = [ dfr.resolve, dfr.reject ];
-            var timeoutId = global.setTimeout(function () {
-              global.clearTimeout(timeoutId);
-              func.apply(undefined, _.union(promiseArgs, args));
-            }, 1);
-            return dfr.promise();
-          };
-        }
+    this.isPromise = (function (scope) {
+      if (scope.Promise) {
+        return scope.isESPromise;
+      } else if (scope.Q) {
+        return scope.isQPromise;
+      } else if (scope.$) {
+        return scope.is$Promise;
       }
-    })(this.Promise, this.Q, this.$);
+    })(this);
 
-    /**
-     * Shorthand for `Promise.all`, `Q.all`, or `$.when` to wait for multiple Promises
-     *
-     * ```javascript
-     * var sleep = promisify(function (resolve, reject, millisec) {
-     *   setTimeout(function () {
-     *     resolve(millisec);
-     *   }, millisec);
-     * });
-     *
-     * all(sleep(100), sleep(200), sleep(300))
-     * .then(function (args) {
-     *   console.log(args[0], args[1], args[2]);  // 100, 200, 300
-     * });
-     * ```
-     *
-     * @method all
-     * @param {Array|Object} Promise arguments
-     * @returns {Object} A Promise object
-     */
-    this.all = (function (Promise, Q, $) {
-      if (Promise) {
-        return function () {
-          var args = _.toArray(arguments);
-          var promises = _.isArray(args[0]) ? args[0] : args;
-          return Promise.all(promises);
-        };
-      } else if (Q) {
-        return function () {
-          var args = _.toArray(arguments);
-          var promises = _.isArray(args[0]) ? args[0] : args;
-          return Q.all(promises);
-        };
-      } else if ($) {
-        return function () {
-          var args = _.toArray(arguments);
-          var promises = _.isArray(args[0]) ? args[0] : args;
-          return $.when.apply(undefined, promises)
-          .then(this.lazify(function () {
-            return _.toArray(arguments);
-          }));
-        };
+    this.promisify = (function (scope) {
+      if (scope.Promise) {
+        return scope.callESPromiseFactory;
+      } else if (scope.Q) {
+        return scope.callQPromiseFactory;
+      } else if (scope.$) {
+        return scope.call$PromiseFactory;
       }
-    })(this.Promise, this.Q, this.$);
+    })(this);
 
-
-    /**
-     * Return the `value` through a Promise interface. This function will
-     * always `resolve` the `value`.
-     *
-     * ```javascript
-     * passed(true)
-     * .then(function (value) {
-     *   console.log(value);  // true
-     * });
-     * ```
-     *
-     * @param {Object} val Any values
-     * @returns {Object} a Promise object
-     */
-    this.passed = this.promisify(function (resolve, reject, val) {
-      resolve(val);
-    });
-
-    /**
-     * Return the `value` through a Promise interface. This function, despite
-     * `passed` always `resolve`, will `reject` if the `value` is an error.
-     *
-     * ```javascript
-     * promisified(new Error('An error'))
-     * .then(function (value) {
-     *   // Won't be called.
-     * }, function (error) {
-     *   console.error(error.message);  // An error
-     * });
-     * ```
-     *
-     * @method promisified
-     * @param {Object} val Any values
-     * @returns {Object} a Promise object
-     */
-    this.promisified = this.promisify(function (resolve, reject, val) {
-      if (val instanceof global.Error) return reject(val);
-      resolve(val);
-    });
-
-    /**
-     * Promise returns timer sleep
-     * @method sleep
-     * @param {Number} millisec Milliseconds to wait
-     * @returns {Object} a Promise object
-     */
-    this.sleep = this.promisify(function (resolve, reject, millisec) {
-      var millisec = _.isNumber(millisec) ? millisec : 80;
-      var id = global.setTimeout(function () {
-        global.clearTimeout(id);
-        resolve(millisec);
-      }, millisec - 1);
-    });
+    this.all = (function (scope) {
+      if (scope.Promise) {
+        return scope.callESAll;
+      } else if (scope.Q) {
+        return scope.callQAll;
+      } else if (scope.$) {
+        return scope.call$All;
+      }
+    })(this);
 
   }
 
   var proto = Promisr.prototype;
+
+  /**
+   * @method isPromise
+   */
+  proto.isPromise = _.noop;
+
+  proto.isESPromise = function (promise) {
+    return promise instanceof this.Promise;
+  };
+
+  proto.isQPromise = function (promise) {
+    return this.Q.isPromise(promise);
+  };
+
+  proto.is$Promise = function (promise) {
+    return _.isObject(this.$.Deferred) && _.isFunction(promise.then);
+  };
+
+  /**
+   * Create new asynchronous function which returns a Promise interface.
+   * This is a higher-order function. The function `func` takes 2 parameters
+   * `resolve` and `reject` at least.
+   *
+   * #### func(resolve, reject, [args...])
+   *
+   * `resolve` and `reject` are always there, and `args...` can be continued
+   * if you want to put some arguments.
+   *
+   * Here is the example:
+   *
+   * ```javascript
+   * var fn = promisify(function (resolve, reject, value) {
+   *   if (value) return resolve(value);
+   *   reject(value);
+   * });
+   *
+   * fn(true)
+   * .then(function (value) {
+   *   console.log(value);  // true
+   * });
+   * ```
+   *
+   * @method promisify
+   * @param {Function} func An immediate function having `resolve` and
+   *     `reject` callbacks and being executed asynchronously
+   * @returns {Function} A partial function will returns a Promise
+   */
+  proto.promisify = _.noop;
+
+  proto.callESPromiseFactory = function (func) {
+    return _.bind(function() {
+      var args = _.toArray(arguments);
+      var promise = new this.Promise(function (resolve, reject) {
+        return func.apply(undefined, _.union([ resolve, reject ], args));
+      })
+      return promise;
+    }, this);
+  };
+
+  proto.callQPromiseFactory = function (func) {
+    return _.bind(function () {
+      var args = _.toArray(arguments);
+      var dfr = this.Q.defer(), promiseArgs = [ dfr.resolve, dfr.reject ];
+      var timeoutId = global.setTimeout(function () {
+        global.clearTimeout(timeoutId);
+        func.apply(undefined, _.union(promiseArgs, args));
+      }, 1);
+      return dfr.promise;
+    }, this);
+  };
+
+  proto.call$PromiseFactory = function (func) {
+    return _.bind(function () {
+      var args = _.toArray(arguments);
+      var dfr = new this.$.Deferred(), promiseArgs = [ dfr.resolve, dfr.reject ];
+      var timeoutId = global.setTimeout(function () {
+        global.clearTimeout(timeoutId);
+        func.apply(undefined, _.union(promiseArgs, args));
+      }, 1);
+      return dfr.promise();
+    }, this);
+  };
 
   /**
    * Create new asynchronous function which returns a Promise interface. This higher-order function, despite the function which is returned by `promisify` has `resolve` and `reject`, only has user defined arguments.
@@ -250,6 +192,185 @@ var Promisr = (function () {
   };
 
   /**
+   * Return the `value` through a Promise interface. This function will
+   * always `resolve` the `value`.
+   *
+   * ```javascript
+   * promisr.just(true)
+   * .then(function (value) {
+   *   console.log(value);  // true
+   * });
+   * ```
+   *
+   * @method just
+   * @param {Object} value Anything
+   * @returns {Promise} a Promise object
+   */
+  proto.just = function (value) {
+    if (this.isPromise(value)) return value;
+    return this.promisify(function (resolve, reject, value) {
+      resolve(value);
+    })(value);
+  };
+
+  /**
+   * Return the `value` through a Promise interface. This function, despite
+   * `just` always `resolve`, will `reject` if the `condition()` is falsy.
+   *
+   * ```javascript
+   * promisr.if(function (value) {
+   *   return !value instanceof Error;
+   * }, new Error('An error'))
+   * .then(function (value) {
+   *   // Won't be called.
+   * }, function (error) {
+   *   console.error(error.message);  // An error
+   * });
+   * ```
+   *
+   * @method if
+   * @param {Function} condition A predicate
+   * @param {Object} value Anything
+   * @returns {Promise} a Promise object
+   */
+  proto.if = function (condition, value) {
+    return this.promisify(function (resolve, reject, condition, value) {
+      if (condition(value)) return resolve(value);
+      reject(value);
+    })(condition, value);
+  };
+
+  /**
+   * @method unlessFalsy
+   * @param {Object} value Anything
+   * @returns {Promise} a Promise object
+   */
+  proto.unlessFalsy = _.partial(proto.if, function (value) {
+    return !!value;
+  });
+
+  /**
+   * @method unlessError
+   * @param {Object} value Anything
+   * @returns {Promise} a Promise object
+   */
+  proto.unlessError = _.partial(proto.if, function (value) {
+    return !value instanceof global.Error;
+  });
+
+  /**
+   * Promise returns timer sleep
+   * @method timer
+   * @param {Number} millisec Milliseconds to wait
+   * @returns {Promise} a Promise object
+   */
+  proto.timer = function (millisec) {
+    return this.promisify(function (resolve, reject, millisec) {
+      var id = global.setTimeout(function () {
+        global.clearTimeout(id);
+        resolve(millisec);
+      }, millisec - 1);
+    })(_.isNumber(millisec) ? millisec : 80);
+  };
+
+  /**
+   * Shorthand for `Promise.all`, `Q.all`, or `$.when` to wait for multiple Promises
+   *
+   * ```javascript
+   * promisr.all(promisr.timer(100), promisr.timer(200), promisr.timer(300))
+   * .then(function (results) {
+   *   console.log(results[0], results[1], results[2]);  // 100, 200, 300
+   * });
+   * ```
+   *
+   * @method all
+   * @param {Array|...Promise} args Promise arguments
+   * @returns {Promise} A Promise object
+   */
+  proto.all = _.noop;
+
+  proto.callESAll = function () {
+    var args = _.toArray(arguments);
+    var promises = _.isArray(args[0]) ? args[0] : args;
+    return this.Promise.all(promises);
+  };
+
+  proto.callQAll = function () {
+    var args = _.toArray(arguments);
+    var promises = _.isArray(args[0]) ? args[0] : args;
+    return this.Q.all(promises);
+  };
+
+  proto.call$All = function () {
+    var args = _.toArray(arguments);
+    var promises = _.isArray(args[0]) ? args[0] : args;
+    return this.$.when.apply(undefined, promises)
+    .then(this.lazify(function () {
+      return _.toArray(arguments);
+    }));
+  };
+
+  /**
+   * @method any
+   * @param {Array|...Promise} args Promise arguments
+   */
+  proto.any = function () {
+    var args = _.toArray(arguments);
+    var promises = _.isArray(args[0]) ? args[0] : args;
+    return this.map(promises, function (promise) {
+      return promise.then(this.just, this.just);
+    });
+  };
+
+  /**
+   * @method some
+   * @param {Array|...Promise} args Promise arguments
+   */
+  proto.some = function () {
+    var args = _.toArray(arguments);
+    var promises = _.isArray(args[0]) ? args[0] : args;
+    return this.map(promises, function (promise) {
+      return promise.then(this.just, this.just);
+    })
+    .then(this.lazify(function (results) {
+      return _.filter(results, function (result) {
+        return !result instanceof global.Error;
+      });
+    }));
+  };
+
+  /**
+   * Promise concatenates array values as promises
+   *
+   * ```javascript
+   * promisr.map(urls, promisr.promisify(function (resolve, reject, url) {
+   *   var el = document.createElement('img');
+   *   el.addEventListener('load', function (ev) {
+   *     resolve(ev.target);
+   *   }, false);
+   *   el.addEventListener('error', function (ev) {
+   *     reject(error);
+   *   }, false);
+   *   el.setAttribute('src', url);
+   * }))
+   * .then(function (els) {
+   *   // Draw preloaded <img>'s
+   *   els.forEach(function (el) {
+   *     document.body.appendChild(el);
+   *   });
+   * });
+   * ```
+   *
+   * @method map
+   * @param {Array} items Array values will be tranformed to promises
+   * @param {Function} func A function transforms `items` to promises
+   * @returns {Object} a Promise object
+   */
+  proto.map = function (values, promisify) {
+    return this.all(_.map(values, promisify));
+  };
+
+  /**
    * Return the `done` Promise interface which has been retried `times` with `interval`.
    *
    * ```javascript
@@ -261,13 +382,13 @@ var Promisr = (function () {
    *   reject(new Error('Not yet'));
    * });
    *
-   * attemptCounted(done, 10, 300)
+   * promisr.count(done, 10, 300)
    * .then(function (count) {
    *   console.log(count);  // 6
    * });
    * ```
    *
-   * @method attemptCounted
+   * @method count
    * @see https://gist.github.com/briancavalier/842626
    * @see https://gist.github.com/kriskowal/593052
    * @param {Object} done A promisified function
@@ -275,13 +396,13 @@ var Promisr = (function () {
    * @param {Number} interval An amount of millisecond interval
    * @returns {Object} A Promise returns success or failed status
    */
-  proto.attemptCounted = function (done, times, interval) {
+  proto.count = function (done, times, interval) {
     function success (dat) { return dat; }
     function fail (err) {
       if (1 >= times) throw err;
-      return this.sleep(interval)
+      return this.timer(interval)
       .then(_.bind(function () {
-        return this.attemptCounted(done, times - 1, interval);
+        return this.count(done, times - 1, interval);
       }, this));
     }
     return done().then(success, _.bind(fail, this));
@@ -299,39 +420,27 @@ var Promisr = (function () {
    *   reject(new Error('Not yet'));
    * });
    *
-   * attemptTicked(done, 3000)
+   * promisr.tick(done, 3000)
    * .then(function (flag) {
    *   console.log(flag);  // true
    * });
    * ```
    *
-   * @method attemptTicked
+   * @method tick
    * @see https://gist.github.com/briancavalier/842626
    * @param {Object} done A promisified function
    * @param {Number} times A number of millisecon duration
    * @returns {Object} A Promise returns success or failed status
    */
-  proto.attemptTicked = function (done, duration, start) {
+  proto.tick = function (done, duration, start) {
     var start = _.isNumber(start) ? start : +(new global.Date());
     function success (dat) { return dat; }
     function fail (err) {
       var stop = +(new global.Date());
       if (duration <= stop - start) throw err;
-      return this.attemptTicked(done, duration, start);
+      return this.tick(done, duration, start);
     }
     return done().then(success, _.bind(fail, this));
-  };
-
-  /**
-   * Promise concatenates array values as promises
-   * @method flatMap
-   * @param {Array} items Array values will be tranformed to promises
-   * @param {Function} promisified A function transforms `items` to promises
-   * @returns {Object} a Promise object
-   */
-  proto.flatMap = function (items, promisified) {
-    if (!_.isFunction(promisified)) return;
-    return this.all(_.map(items, promisified));
   };
 
   return Promisr;
