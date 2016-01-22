@@ -198,20 +198,51 @@ var Promisr = (function () {
    * always `resolve` the `value`.
    *
    * ```javascript
-   * promisr.just(true)
+   * promisr.return(true)
    * .then(function (value) {
+   *   console.log(value);  // true
+   * }, function () {
+   *   // Never
+   * });
+   * ```
+   *
+   * @method return
+   * @param {Object} value Anything
+   * @returns {Promise} a Promise object
+   */
+  proto.return = function (value) {
+    if (this.isPromise(value)) throw new global.Error('Argument must not be a Promise');
+    return this.promisify(function (resolve, reject, value) {
+      resolve(value);
+    })(value);
+  };
+
+  /**
+   * Alias to `return`
+   */
+  proto.just = proto.return;
+
+  /**
+   * Return the `value` through a Promise interface. This function will
+   * always `reject` the `value`.
+   *
+   * ```javascript
+   * promisr.throw(true)
+   * .then(function () {
+   *   // Never
+   * }, function (value) {
    *   console.log(value);  // true
    * });
    * ```
    *
-   * @method just
+   * @method throw
    * @param {Object} value Anything
    * @returns {Promise} a Promise object
    */
-  proto.just = function (value) {
-    if (this.isPromise(value)) return value;
+  proto.throw = function (value) {
+    if (this.isPromise(value)) throw new global.Error('Argument must not be a Promise');
     return this.promisify(function (resolve, reject, value) {
-      resolve(value);
+      reject(value);
     })(value);
   };
 
@@ -320,7 +351,7 @@ var Promisr = (function () {
     var args = _.toArray(arguments);
     var promises = _.isArray(args[0]) ? args[0] : args;
     return this.map(promises, function (promise) {
-      return promise.then(this.just, this.just);
+      return promise.then(_.bind(this.return, this), _.bind(this.return, this));
     });
   };
 
@@ -332,11 +363,12 @@ var Promisr = (function () {
     var args = _.toArray(arguments);
     var promises = _.isArray(args[0]) ? args[0] : args;
     return this.map(promises, function (promise) {
-      return promise.then(this.just, this.just);
+      return promise.then(_.bind(this.return, this), _.bind(this.return, this));
     })
     .then(this.lazify(function (results) {
       return _.filter(results, function (result) {
-        return !result instanceof global.Error;
+        if (result instanceof global.Error) return false;
+        return true;
       });
     }));
   };
@@ -369,7 +401,7 @@ var Promisr = (function () {
    * @returns {Object} a Promise object
    */
   proto.map = function (values, promisify) {
-    return this.all(_.map(values, promisify));
+    return this.all(_.map(values, _.bind(promisify, this)));
   };
 
   /**

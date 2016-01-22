@@ -5,36 +5,24 @@ index.js
 ---
 
 - [`Promisr`](#Promisr)
-
 - [`isPromise`](#isPromise)
-
 - [`promisify`](#promisify)
-
 - [`lazify`](#lazify)
-
+- [`return`](#return)
 - [`just`](#just)
-
+- [`throw`](#throw)
 - [`if`](#if)
-
 - [`unlessFalsy`](#unlessFalsy)
-
 - [`unlessError`](#unlessError)
-
 - [`timer`](#timer)
-
 - [`all`](#all)
-
 - [`any`](#any)
-
 - [`some`](#some)
-
 - [`map`](#map)
-
 - [`count`](#count)
-
 - [`tick`](#tick)
 
-### <a id="Promisr"></a> `Promisr`
+### <a id="Promisr">`Promisr`</a>
 
 The constructor to instantiate Promisr class
 
@@ -52,11 +40,11 @@ var promisr = new Promisr(window.Promise || window.Q || window.jQuery)
 
 - - -
 
-### <a id="isPromise"></a> `isPromise()`
+### <a id="isPromise">`isPromise()`</a>
 
 - - -
 
-### <a id="promisify"></a> `promisify(func)`
+### <a id="promisify">`promisify(func)`</a>
 
 Create new asynchronous function which returns a Promise interface.
 This is a higher-order function. The function `func` takes 2 parameters
@@ -91,7 +79,7 @@ fn(true)
 
 - - -
 
-### <a id="lazify"></a> `lazify(func)`
+### <a id="lazify">`lazify(func)`</a>
 
 Create new asynchronous function which returns a Promise interface. This higher-order function, despite the function which is returned by `promisify` has `resolve` and `reject`, only has user defined arguments.
 
@@ -123,14 +111,46 @@ fn(false)
 
 - - -
 
-### <a id="just"></a> `just(value)`
+### <a id="return">`return(value)`</a>
 
 Return the `value` through a Promise interface. This function will
 always `resolve` the `value`.
 
 ```javascript
-promisr.just(true)
+promisr.return(true)
 .then(function (value) {
+  console.log(value);  // true
+}, function () {
+  // Never
+});
+```
+
+#### Arguments:
+
+- `value :: Object` Anything
+
+#### Return:
+
+*(Promise)* a Promise object
+
+- - -
+
+### <a id="just">`just`</a>
+
+Alias to `return`
+
+- - -
+
+### <a id="throw">`throw(value)`</a>
+
+Return the `value` through a Promise interface. This function will
+always `reject` the `value`.
+
+```javascript
+promisr.throw(true)
+.then(function () {
+  // Never
+}, function (value) {
   console.log(value);  // true
 });
 ```
@@ -145,7 +165,7 @@ promisr.just(true)
 
 - - -
 
-### <a id="if"></a> `if(condition, value)`
+### <a id="if">`if(condition, value)`</a>
 
 Return the `value` through a Promise interface. This function, despite
 `just` always `resolve`, will `reject` if the `condition()` is falsy.
@@ -172,7 +192,7 @@ promisr.if(function (value) {
 
 - - -
 
-### <a id="unlessFalsy"></a> `unlessFalsy(value)`
+### <a id="unlessFalsy">`unlessFalsy(value)`</a>
 
 #### Arguments:
 
@@ -184,7 +204,7 @@ promisr.if(function (value) {
 
 - - -
 
-### <a id="unlessError"></a> `unlessError(value)`
+### <a id="unlessError">`unlessError(value)`</a>
 
 #### Arguments:
 
@@ -196,7 +216,7 @@ promisr.if(function (value) {
 
 - - -
 
-### <a id="timer"></a> `timer(millisec)`
+### <a id="timer">`timer(millisec)`</a>
 
 Promise returns timer sleep
 
@@ -210,7 +230,7 @@ Promise returns timer sleep
 
 - - -
 
-### <a id="all"></a> `all(args)`
+### <a id="all">`all(args)`</a>
 
 Shorthand for `Promise.all`, `Q.all`, or `$.when` to wait for multiple Promises
 
@@ -231,7 +251,7 @@ promisr.all(promisr.timer(100), promisr.timer(200), promisr.timer(300))
 
 - - -
 
-### <a id="any"></a> `any(args)`
+### <a id="any">`any(args)`</a>
 
 #### Arguments:
 
@@ -239,7 +259,7 @@ promisr.all(promisr.timer(100), promisr.timer(200), promisr.timer(300))
 
 - - -
 
-### <a id="some"></a> `some(args)`
+### <a id="some">`some(args)`</a>
 
 #### Arguments:
 
@@ -247,7 +267,7 @@ promisr.all(promisr.timer(100), promisr.timer(200), promisr.timer(300))
 
 - - -
 
-### <a id="map"></a> `map(items, func)`
+### <a id="map">`map(items, func)`</a>
 
 Promise concatenates array values as promises
 
@@ -281,7 +301,7 @@ promisr.map(urls, promisr.promisify(function (resolve, reject, url) {
 
 - - -
 
-### <a id="count"></a> `count(done, times, interval)`
+### <a id="count">`count(done, times, interval)`</a>
 
 Return the `done` Promise interface which has been retried `times` with `interval`.
 
@@ -314,7 +334,7 @@ See: https://gist.github.com/kriskowal/593052
 
 - - -
 
-### <a id="tick"></a> `tick(done, times)`
+### <a id="tick">`tick(done, times)`</a>
 
 Return the `done` Promise interface which has been retried in the `duration`.
 
