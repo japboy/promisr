@@ -8,13 +8,14 @@
     "eslint": "eslint ./index.js ./test/*.js",
     "mocha": "mocha ./test/index.js",
     "testem": "testem ci",
-    "dist": "npm run browserify && npm run uglify",
+    "build": "npm run browserify && npm run uglify",
     "browserify": "browserify ./index.js --outfile ./dist/promisr.js --standalone Promisr",
     "uglify": "uglifyjs ./dist/promisr.js --output ./dist/promisr.min.js",
     "doc": "node ./scripts/make-readme.js",
-    "release-patch": "git checkout master && npm run dist; git commit -a -m 'Build dist/'; npm version patch && git push origin master --tags && npm publish --access=public",
-    "release-minor": "git checkout master && npm run dist; git commit -a -m 'Build dist/'; npm version minor && git push origin master --tags && npm publish --access=public",
-    "release-major": "git checkout master && npm run dist; git commit -a -m 'Build dist/'; npm version major && git push origin master --tags && npm publish --access=public"
+    "dist": "npm run build && npm test && npm run doc",
+    "release-patch": "git checkout master && npm run dist && npm version patch && git push origin master --tags && npm publish",
+    "release-minor": "git checkout master && npm run dist && npm version minor && git push origin master --tags && npm publish",
+    "release-major": "git checkout master && npm run dist && npm version major && git push origin master --tags && npm publish"
   },
   "repository": {
     "type": "git",
