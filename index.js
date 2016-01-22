@@ -349,7 +349,7 @@ var Promisr = (function () {
     var args = _.toArray(arguments);
     var promises = _.isArray(args[0]) ? args[0] : args;
     return this.map(promises, function (promise) {
-      return promise.then(this.just, this.just);
+      return promise.then(_.bind(this.return, this), _.bind(this.return, this));
     });
   };
 
@@ -361,11 +361,12 @@ var Promisr = (function () {
     var args = _.toArray(arguments);
     var promises = _.isArray(args[0]) ? args[0] : args;
     return this.map(promises, function (promise) {
-      return promise.then(this.just, this.just);
+      return promise.then(_.bind(this.return, this), _.bind(this.return, this));
     })
     .then(this.lazify(function (results) {
       return _.filter(results, function (result) {
-        return !result instanceof global.Error;
+        if (result instanceof global.Error) return false;
+        return true;
       });
     }));
   };
@@ -398,7 +399,7 @@ var Promisr = (function () {
    * @returns {Object} a Promise object
    */
   proto.map = function (values, promisify) {
-    return this.all(_.map(values, promisify));
+    return this.all(_.map(values, _.bind(promisify, this)));
   };
 
   /**

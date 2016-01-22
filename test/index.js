@@ -30,5 +30,8 @@ require('./return');
 require('./throw');
 require('./if');
 require('./all');
+require('./any');
+require('./some');
+require('./map');
 require('./count');
 require('./tick');
