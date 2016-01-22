@@ -196,20 +196,51 @@ var Promisr = (function () {
    * always `resolve` the `value`.
    *
    * ```javascript
-   * promisr.just(true)
+   * promisr.return(true)
    * .then(function (value) {
+   *   console.log(value);  // true
+   * }, function () {
+   *   // Never
+   * });
+   * ```
+   *
+   * @method return
+   * @param {Object} value Anything
+   * @returns {Promise} a Promise object
+   */
+  proto.return = function (value) {
+    if (this.isPromise(value)) throw new global.Error('Argument must not be a Promise');
+    return this.promisify(function (resolve, reject, value) {
+      resolve(value);
+    })(value);
+  };
+
+  /**
+   * Alias to `return`
+   */
+  proto.just = proto.return;
+
+  /**
+   * Return the `value` through a Promise interface. This function will
+   * always `reject` the `value`.
+   *
+   * ```javascript
+   * promisr.throw(true)
+   * .then(function () {
+   *   // Never
+   * }, function (value) {
    *   console.log(value);  // true
    * });
    * ```
    *
-   * @method just
+   * @method throw
    * @param {Object} value Anything
    * @returns {Promise} a Promise object
    */
-  proto.just = function (value) {
-    if (this.isPromise(value)) return value;
+  proto.throw = function (value) {
+    if (this.isPromise(value)) throw new global.Error('Argument must not be a Promise');
     return this.promisify(function (resolve, reject, value) {
-      resolve(value);
+      reject(value);
     })(value);
   };
 
