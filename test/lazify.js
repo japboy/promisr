@@ -37,7 +37,7 @@ describe('Tests for `lazify` method', function () {
       .then(function (value) {
         expect(value).to.not.exist;
       }, function (error) {
-        expect(error).to.be.an.instanceof(Error);
+        expect(error).to.be.an.instanceof(global.Error);
       });
     });
   });

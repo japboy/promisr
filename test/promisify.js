@@ -37,7 +37,7 @@ describe('Tests for `promisify` method', function () {
       .then(function (value) {
         expect(value).to.not.exist;
       }, function (value) {
-        expect(value).to.be.an('undefined');
+        expect(value).to.be.undefined;
       });
     });
   });
