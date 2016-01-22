@@ -6,21 +6,16 @@ API
   <?= doc.filename ?>
   ---
 
-  <? doc.javadoc.forEach(function(comment) { ?>
-    <? if (!comment.ignore) { ?>
-      <? if (comment.name) { ?>
-        - [`<?= comment.name ?>`](#<?= comment.name ?>)
-      <? } ?>
-    <? } ?>
+  <? doc.javadoc.forEach(function(comment) { ?><? if (!comment.ignore && comment.name) { ?>- [`<?= comment.name ?>`](#<?= comment.name ?>)<? } ?>
   <? }) ?>
 
   <? doc.javadoc.forEach(function(comment) { ?>
     <? if (!comment.ignore) { ?>
       <? if (comment.name) { ?>
         <? if (comment.isMethod || comment.isFunction) { ?>
-          ### <a id="<?= comment.name ?>"></a> `<?= comment.name ?>(<?= comment.paramStr ?>)`
+          ### <a id="<?= comment.name ?>">`<?= comment.name ?>(<?= comment.paramStr ?>)`</a>
         <? } else { ?>
-          ### <a id="<?= comment.name ?>"></a> `<?= comment.name ?>`
+          ### <a id="<?= comment.name ?>">`<?= comment.name ?>`</a>
         <? } ?>
       <? } ?>
 
